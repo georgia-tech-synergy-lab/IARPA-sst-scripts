@@ -9,8 +9,7 @@ def connect(name, c0, port0, c1, port1, latency):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--home_path', default="../../../../") # TODO: Update as per your path
-#parser.add_argument('--proj_path', default="iarpa_intel_branch/")
-parser.add_argument('--proj_path', default="snoop_filter_branch/")
+parser.add_argument('--proj_path', default="sst-src/")
 parser.add_argument('--node1minAddr', type=int, default=100)
 parser.add_argument('--node2minAddr', type=int, default=200)
 parser.add_argument('--node3minAddr', type=int, default=300)
@@ -58,12 +57,12 @@ coherence_protocol = "MESI"
 arbiter_params = {
     "arbiter_frequency": core_clock,
     "overrideGroupID": 3,
-    "port1minAddr": args.node1minAddr,
-    "port2minAddr": args.node2minAddr,
-    "port3minAddr": args.node3minAddr,
-    "port1maxAddr": args.node1maxAddr,
-    "port2maxAddr": args.node2maxAddr,
-    "port3maxAddr": args.node3maxAddr,
+    "port1minAddr": args.node1minAddr * 1024 * 1024,
+    "port2minAddr": args.node2minAddr * 1024 * 1024,
+    "port3minAddr": args.node3minAddr * 1024 * 1024,
+    "port1maxAddr": args.node1maxAddr * 1024 * 1024,
+    "port2maxAddr": args.node2maxAddr * 1024 * 1024,
+    "port3maxAddr": args.node3maxAddr * 1024 * 1024,
 }
 
 mem_backend_params = {

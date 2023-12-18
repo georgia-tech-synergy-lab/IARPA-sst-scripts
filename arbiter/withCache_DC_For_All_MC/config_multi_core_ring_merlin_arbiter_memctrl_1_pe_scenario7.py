@@ -10,7 +10,7 @@ def connect(name, c0, port0, c1, port1, latency):
 parser = argparse.ArgumentParser()
 parser.add_argument('--home_path', default="../../../../") # TODO: Update as per your path
 #parser.add_argument('--proj_path', default="iarpa_intel_branch/")
-parser.add_argument('--proj_path', default="snoop_filter_branch/")
+parser.add_argument('--proj_path', default="sst-src/")
 parser.add_argument('--node1minAddr', type=int, default=100)
 parser.add_argument('--node2minAddr', type=int, default=200)
 parser.add_argument('--node3minAddr', type=int, default=300)
@@ -386,7 +386,7 @@ gen.addParams({
 
 print("\tCreating mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id))
 connect("mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id),
-        pe, "cache_link",
+        pe, "memory",
         router_map[rtr_name], "port2",
         ring_latency).setNoCut()
 
@@ -421,7 +421,7 @@ gen.addParams({
 
 print("\tCreating mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id))
 connect("mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id),
-        pe, "cache_link",
+        pe, "memory",
         router_map[rtr_name], "port2",
         ring_latency).setNoCut()
 
