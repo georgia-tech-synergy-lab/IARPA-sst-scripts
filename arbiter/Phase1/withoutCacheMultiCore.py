@@ -26,7 +26,7 @@ args = parser.parse_args()
 exp_name = "Arbiter-Scenario4"
 
 num_mem_ctrls = 5
-num_pes = 1 # Number of Processing Engines (CPUs)
+num_pes = 2 # Number of Processing Engines (CPUs)
 core_clock = "2800MHz"
 cache_line_size = 64
 memory_clock = "1600MHz"
@@ -34,7 +34,7 @@ total_memory_size = 1 # GB
 total_memory_size_in_MB = total_memory_size * 1024
 total_memory_size_in_bytes = total_memory_size * 1024 * 1024 * 1024
 
-num_routers = 4
+num_routers = 5 
 mem_interleave_size = 64
 ring_latency = "300ps"
 scratch_latency = "300ps"
@@ -54,38 +54,6 @@ pe_params = {
 
 coherence_protocol = "MESI"
 
-l1_cache_params = {
-    "debug": 0,
-    "cache_frequency": core_clock,
-    "cache_size": "64KiB",
-    "associativity": 8,
-    "access_latency_cycles": 20,
-    "L1": 1,
-    "cache_line_size": cache_line_size,
-    "coherence_protocol": coherence_protocol,
-    "cache_type": "inclusive",
-    "mshr_num_entries": 48,
-    "mshr_latency_cycles": 4,
-    "memNIC.network_bw": ring_bandwidth,
-}
-
-l2_cache_params = {
-    "verbose": 0,
-    "cache_frequency": core_clock,
-    "cache_size": "256KiB",
-    "associativity": 16,
-    "access_latency_cycles": 100,
-    "L1": 0,
-    "cache_line_size": cache_line_size,
-    "coherence_protocol": coherence_protocol,
-    "cache_type": "inclusive",
-    "mshr_num_entries": 256,
-    "mshr_latency_cycles": 8,
-    "memNIC.network_bw": ring_bandwidth,
-    "num_cache_slices": num_pes,
-    "slice_allocation_policy": "rr",
-}
-
 arbiter_params = {
     "arbiter_frequency": core_clock,
     "overrideGroupID": 3,
@@ -95,7 +63,14 @@ arbiter_params = {
     "port1maxAddr": args.node1maxAddr * 1024 * 1024,
     "port2maxAddr": args.node2maxAddr * 1024 * 1024,
     "port3maxAddr": args.node3maxAddr * 1024 * 1024,
-    "isCacheConnected": True,
+    "isCacheConnected": False,
+    "num_cpus": 2,
+    "CPU0": "mirandaCPU_%d" % (0), 
+    "allowedMinAddr0": args.node1minAddr * 1024 * 1024, 
+    "allowedMaxAddr0": args.node3maxAddr * 1024 * 1024, 
+    "CPU1": "mirandaCPU_%d" % (1), 
+    "allowedMinAddr1": args.node1minAddr * 1024 * 1024, 
+    "allowedMaxAddr1": args.node3maxAddr * 1024 * 1024, 
 }
 
 mem_backend_params = {
@@ -115,7 +90,7 @@ ring_params = {
 }
 
 topo_params = {
-    "shape": num_routers, # Put number of router here
+    "shape": num_routers, # Put number of router here 
     "width": "1"
 }
 
@@ -190,28 +165,11 @@ mem_backend = mem.setSubComponent("backend", "memHierarchy.dramsim3")
 mem_backend.addParams({"mem_size": str((args.node1maxAddr-args.node1minAddr) * 1024 * 1024) + "B"}) # For DRAMSim3, backend.mem_size must be a multiple of 1MB.
 mem_backend.addParams(mem_backend_params)
 
-print("\tBuilding directory_ctrl_%d" % mem_id)
-dc = sst.Component("directory_ctrl_%d" % (mem_id), "memHierarchy.DirectoryController")
-dc.addParams({
-    "addr_range_start": args.node1minAddr * 1024 * 1024,
-    "addr_range_end": args.node1maxAddr * 1024 * 1024})
-
-dc_cpulink = dc.setSubComponent("cpulink", "memHierarchy.MemLink") # Connect this to your component
-dc_memlink = dc.setSubComponent("memlink", "memHierarchy.MemLink") # Connect this to the memory controller
-
-print("\tCreating mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id))
-connect("mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id),
+print("\t\tCreating arbiter_%d_mem_ctrl_%d_link" % (rtr_id, node_id))
+connect("mem_ctrl_%d_arbiter_%d_link" % (node_id, rtr_id),
         mem, "direct_link",
-        dc_memlink, "port",
-        ring_latency)
-
-print("\tCreating directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id))
-connect("directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id),
-        dc_cpulink, "port",
         arbiter, "port1",
         ring_latency)
-
-mem_id += 1
 
 
 # Arbiter Port1 ------------------------------------------------------------------
@@ -229,28 +187,11 @@ mem_backend = mem.setSubComponent("backend", "memHierarchy.dramsim3")
 mem_backend.addParams({"mem_size": str((args.node2maxAddr-args.node2minAddr) * 1024 * 1024) + "B"})
 mem_backend.addParams(mem_backend_params)
 
-print("\tBuilding directory_ctrl_%d" % mem_id)
-dc = sst.Component("directory_ctrl_%d" % (mem_id), "memHierarchy.DirectoryController")
-dc.addParams({
-    "addr_range_start": args.node2minAddr * 1024 * 1024,
-    "addr_range_end": args.node2maxAddr * 1024 * 1024})
-
-dc_cpulink = dc.setSubComponent("cpulink", "memHierarchy.MemLink") # Connect this to your component
-dc_memlink = dc.setSubComponent("memlink", "memHierarchy.MemLink") # Connect this to the memory controller
-
-print("\tCreating mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id))
-connect("mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id),
+print("\t\tCreating arbiter_%d_mem_ctrl_%d_link" % (rtr_id, node_id))
+connect("mem_ctrl_%d_arbiter_%d_link" % (node_id, rtr_id),
         mem, "direct_link",
-        dc_memlink, "port",
-        ring_latency)
-
-print("\tCreating directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id))
-connect("directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id),
-        dc_cpulink, "port",
         arbiter, "port2",
         ring_latency)
-
-mem_id += 1
 
 # Arbiter Port2 ------------------------------------------------------------------
 
@@ -267,34 +208,11 @@ mem_backend = mem.setSubComponent("backend", "memHierarchy.dramsim3")
 mem_backend.addParams({"mem_size": str((args.node3maxAddr-args.node3minAddr) * 1024 * 1024) + "B"})
 mem_backend.addParams(mem_backend_params)
 
-#print("\t\tCreating arbiter_%d_mem_ctrl_%d_link" % (rtr_id, node_id))
-#connect("mem_ctrl_%d_arbiter_%d_link" % (node_id, rtr_id),
-#        mem, "direct_link",
-#        arbiter, "port3",
-#        ring_latency)
-
-print("\tBuilding directory_ctrl_%d" % mem_id)
-dc = sst.Component("directory_ctrl_%d" % (mem_id), "memHierarchy.DirectoryController")
-dc.addParams({
-    "addr_range_start": args.node3minAddr * 1024 * 1024,
-    "addr_range_end": args.node3maxAddr * 1024 * 1024})
-
-dc_cpulink = dc.setSubComponent("cpulink", "memHierarchy.MemLink") # Connect this to your component
-dc_memlink = dc.setSubComponent("memlink", "memHierarchy.MemLink") # Connect this to the memory controller
-
-print("\tCreating mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id))
-connect("mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id),
+print("\t\tCreating arbiter_%d_mem_ctrl_%d_link" % (rtr_id, node_id))
+connect("mem_ctrl_%d_arbiter_%d_link" % (node_id, rtr_id),
         mem, "direct_link",
-        dc_memlink, "port",
-        ring_latency)
-
-print("\tCreating directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id))
-connect("directory_ctrl_%d_arbiter_%d_link"%(mem_id, rtr_id),
-        dc_cpulink, "port",
         arbiter, "port3",
         ring_latency)
-
-mem_id += 1
 
 # Arbiter connection to the router ------------------------------------------------------------------
 
@@ -303,7 +221,6 @@ connect("arbiter_%d_rtr_%d_link"%(rtr_id, rtr_id),
         arbiter, "directory",
         router_map[rtr_name], "port2",
         ring_latency)
-
 
 ###########################################################################
 # Router 1 connection -----------------------------------------------------
@@ -371,9 +288,9 @@ mem_backend.addParams(mem_backend_params)
 
 print("\tBuilding directory_ctrl_%d" % mem_id)
 dc = sst.Component("directory_ctrl_%d" % (mem_id), "memHierarchy.DirectoryController")
-#dc.addParams({
-#    "addr_range_start": args.node4maxAddr * 1024 * 1024,
-#    "addr_range_end": total_memory_size_in_MB * 1024 * 1024})
+dc.addParams({
+    "addr_range_start": args.node4maxAddr * 1024 * 1024,
+    "addr_range_end": total_memory_size_in_MB * 1024 * 1024})
 
 print("\tCreating mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id))
 connect("mem_ctrl_%d_directory_ctrl_%d_link"%(mem_id, mem_id),
@@ -405,18 +322,11 @@ pe = sst.Component("mirandaCPU_%d" % (pe_id), "miranda.BaseCPU")
 pe.addParams(pe_params)
 #----------------------------------------------------------------------
 
-# L1 ------------------------------------------------------------------
-print("\tBuilding l1_cache_%d" % (pe_id))
-l1_cache = sst.Component("l1_cache_%d" % (pe_id), "memHierarchy.Cache")
-l1_cache.addParams(l1_cache_params)
-#----------------------------------------------------------------------
-
-# L2 ------------------------------------------------------------------
-print("\tBuilding l2_cache_%d" % (pe_id))
-l2_cache = sst.Component("l2_cache_%d" % (pe_id), "memHierarchy.Cache")
-l2_cache.addParams(l2_cache_params)
-l2_cache.addParams({"slice_id": pe_id})
-#----------------------------------------------------------------------
+debug_params = { "debug" : 1, "debug_level" : 10 }
+iface = pe.setSubComponent("memory", "memHierarchy.standardInterface")
+iface.addParams(debug_params)
+cpu_nic = iface.setSubComponent("memlink", "memHierarchy.MemNIC")
+cpu_nic.addParams({"group" : 2, "network_bw" : "96GB/s"})
 
 # Custom Random Generator ------------------------------------------------------
 gen = pe.setSubComponent("generator", "miranda.CustomRandomGenerator")
@@ -425,25 +335,54 @@ gen.addParams({
     "avoid_addr_range_max_value" : args.node4maxAddr,
     "max_address" : total_memory_size_in_MB,
     "verbose" : 0,
-    "count" : args.packet_count,
+    "count" : args.packet_count, 
 })
 #----------------------------------------------------------------------
 
-print("\tCreating mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id))
-connect("mirandaCPU_%d_l1_cache_%d_link"%(pe_id, pe_id),
-        pe, "cache_link",
-        l1_cache, "high_network_0",
-        ring_latency).setNoCut()
+print("\tCreating mirandaCPU_%d_rtr_%d_link"%(pe_id, rtr_id))
+connect("mirandaCPU_%d_rtr_%d_link"%(pe_id, rtr_id),
+        cpu_nic, "port",
+        router_map[rtr_name], "port2",
+        ring_latency)
 
-print("\tCreating l1_cache_%d_l2_cache_%d_link"%(pe_id, pe_id))
-connect("l1_cache_%d_l2_cache_%d_link"%(pe_id, pe_id),
-        l1_cache, "low_network_0",
-        l2_cache, "high_network_0",
-        ring_latency).setNoCut()
+pe_id += 1
 
-print("\tCreating l2_cache_%d_rtr_%d_link"%(pe_id, rtr_id))
-connect("l2_cache_%d_rtr_%d_link"%(pe_id, rtr_id),
-        l2_cache, "directory",
+###########################################################################
+# Router 4 connection -----------------------------------------------------
+###########################################################################
+
+node_id += 1
+rtr_id += 1
+rtr_name = "rtr_%d" % (rtr_id)
+
+print("Building node_%d" % (rtr_id))
+
+# PE ------------------------------------------------------------------
+print("\tBuilding mirandaCPU_%d" % (pe_id))
+pe = sst.Component("mirandaCPU_%d" % (pe_id), "miranda.BaseCPU")
+pe.addParams(pe_params)
+#----------------------------------------------------------------------
+
+debug_params = { "debug" : 1, "debug_level" : 10 }
+iface = pe.setSubComponent("memory", "memHierarchy.standardInterface")
+iface.addParams(debug_params)
+cpu_nic = iface.setSubComponent("memlink", "memHierarchy.MemNIC")
+cpu_nic.addParams({"group" : 2, "network_bw" : "96GB/s"})
+
+# Custom Random Generator ------------------------------------------------------
+gen = pe.setSubComponent("generator", "miranda.CustomRandomGenerator")
+gen.addParams({
+    "avoid_addr_range_min_value" : args.node4minAddr,
+    "avoid_addr_range_max_value" : args.node4maxAddr,
+    "max_address" : total_memory_size_in_MB,
+    "verbose" : 0,
+    "count" : args.packet_count, 
+})
+#----------------------------------------------------------------------
+
+print("\tCreating mirandaCPU_%d_rtr_%d_link"%(pe_id, rtr_id))
+connect("mirandaCPU_%d_rtr_%d_link"%(pe_id, rtr_id),
+        cpu_nic, "port",
         router_map[rtr_name], "port2",
         ring_latency)
 
