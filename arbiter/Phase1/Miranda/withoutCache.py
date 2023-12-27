@@ -8,7 +8,7 @@ def connect(name, c0, port0, c1, port1, latency):
     return link
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--home_path', default="../../../../") # TODO: Update as per your path
+parser.add_argument('--home_path', default="../../../../../") # TODO: Update as per your path
 parser.add_argument('--proj_path', default="sst-src/")
 parser.add_argument('--node1minAddr', type=int, default=100)
 parser.add_argument('--node2minAddr', type=int, default=200)

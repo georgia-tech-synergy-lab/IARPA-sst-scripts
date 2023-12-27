@@ -8,7 +8,7 @@ def connect(name, c0, port0, c1, port1, latency):
     return link
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--home_path', default="../../../../") # TODO: Update as per your path
+parser.add_argument('--home_path', default="../../../../../") # TODO: Update as per your path
 parser.add_argument('--proj_path', default="sst-src/")
 parser.add_argument('--node1minAddr', type=int, default=100)
 parser.add_argument('--node2minAddr', type=int, default=200)
@@ -65,12 +65,12 @@ arbiter_params = {
     "port3maxAddr": args.node3maxAddr * 1024 * 1024,
     "isCacheConnected": False,
     "num_cpus": 2,
-    "CPU0": "mirandaCPU_%d" % (0), 
+    "CPU0": "mirandaCPU_%d:memory" % (0), 
     "allowedMinAddr0": args.node1minAddr * 1024 * 1024, 
     "allowedMaxAddr0": args.node3maxAddr * 1024 * 1024, 
-    "CPU1": "mirandaCPU_%d" % (1), 
+    "CPU1": "mirandaCPU_%d:memory" % (1), 
     "allowedMinAddr1": args.node1minAddr * 1024 * 1024, 
-    "allowedMaxAddr1": args.node3maxAddr * 1024 * 1024, 
+    "allowedMaxAddr1": args.node1maxAddr * 1024 * 1024, 
 }
 
 mem_backend_params = {
