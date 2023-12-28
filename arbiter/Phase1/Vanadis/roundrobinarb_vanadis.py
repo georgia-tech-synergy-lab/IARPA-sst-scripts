@@ -561,9 +561,9 @@ memctrl2.addParams({
 
 # node memory controller backend 
 mem_backend_params = {
-    "config_ini": "%s%s/DRAMsim3/configs/DDR4_8Gb_x4_3200.ini"\
+    "config_ini": "%s%s/DRAMSim3/configs/DDR4_8Gb_x4_3200.ini"\
             % ("../../../../../", "sst-src"),
-    "output_dir": "Arbiter-Scenario"
+    "output_dir": "./"
 }
 memory0 = memctrl0.setSubComponent("backend", "memHierarchy.dramsim3")
 memory0.addParams(memParams)

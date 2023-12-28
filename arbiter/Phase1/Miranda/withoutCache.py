@@ -23,7 +23,7 @@ parser.add_argument('--max_reqs_per_cycle', type=int, default=2)
 
 args = parser.parse_args()
 
-exp_name = "Arbiter-Scenario4"
+exp_name = "./"
 
 num_mem_ctrls = 5
 num_pes = 1 # Number of Processing Engines (CPUs)
@@ -66,7 +66,7 @@ arbiter_params = {
 }
 
 mem_backend_params = {
-    "config_ini": "%s%s/DRAMsim3/configs/DDR4_8Gb_x4_3200.ini"\
+    "config_ini": "%s%s/DRAMSim3/configs/DDR4_8Gb_x4_3200.ini"\
             % (args.home_path, args.proj_path),
     "output_dir": exp_name
 }
@@ -371,6 +371,6 @@ sst.setStatisticOutput("sst.statoutputcsv")
 csv_path = "%s%s"\
             % (args.home_path, args.proj_path)
 
-sst.setStatisticOutputOptions({"filepath": "%s/sst-scripts/arbiter/%s.csv" % (csv_path, exp_name)})
+sst.setStatisticOutputOptions({"filepath": "./%s.csv" % (exp_name)})
 sst.setStatisticLoadLevel(16)
 sst.enableAllStatisticsForAllComponents()
