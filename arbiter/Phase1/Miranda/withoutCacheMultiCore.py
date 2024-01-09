@@ -331,8 +331,8 @@ cpu_nic.addParams({"group" : 2, "network_bw" : "96GB/s"})
 # Custom Random Generator ------------------------------------------------------
 gen = pe.setSubComponent("generator", "miranda.CustomRandomGenerator")
 gen.addParams({
-    "avoid_addr_range_min_value" : args.node4minAddr,
-    "avoid_addr_range_max_value" : args.node4maxAddr,
+    "avoid_addr_range_min_value" : args.node4minAddr * 1024 * 1024,
+    "avoid_addr_range_max_value" : args.node4maxAddr * 1024 * 1024,
     "max_address" : total_memory_size_in_MB,
     "verbose" : 0,
     "count" : args.packet_count, 
@@ -372,8 +372,8 @@ cpu_nic.addParams({"group" : 2, "network_bw" : "96GB/s"})
 # Custom Random Generator ------------------------------------------------------
 gen = pe.setSubComponent("generator", "miranda.CustomRandomGenerator")
 gen.addParams({
-    "avoid_addr_range_min_value" : args.node4minAddr,
-    "avoid_addr_range_max_value" : args.node4maxAddr,
+    "avoid_addr_range_min_value" : args.node4minAddr * 1024 * 1024,
+    "avoid_addr_range_max_value" : args.node4maxAddr * 1024 * 1024,
     "max_address" : total_memory_size_in_MB,
     "verbose" : 0,
     "count" : args.packet_count, 
